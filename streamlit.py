@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import datetime
 import calendar
+import requests
 
 # =======================
 # עיצוב עמוד: רקע טורקיז וטקסט לבן
@@ -53,11 +54,11 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.set_page_config(page_title="📅 יום ומזל אסטרולוגי", layout="centered")
-st.title("📅 איזה יום זה + מזל אסטרולוגי")
+st.set_page_config(page_title="📅 יום ומזל + אירוע היסטורי", layout="centered")
+st.title("📅 איזה יום זה + מזל אסטרולוגי + אירוע היסטורי")
 
 # =======================
-# פונקציה למזל אסטרולוגי מדויק
+# פונקציה למזל אסטרולוגי
 def zodiac_sign(day, month):
     zodiac = [
         ("גדי", (22,12),(19,1), "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Capricorn_symbol.svg/120px-Capricorn_symbol.svg.png"),
@@ -82,6 +83,26 @@ def zodiac_sign(day, month):
     return None, None
 
 # =======================
+# פונקציה לאירוע היסטורי
+def historical_event(day, month):
+    # שימוש ב-Wikipedia API חינמי
+    url = f"https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/{month}/{day}"
+    try:
+        response = requests.get(url)
+        data = response.json()
+        events = data.get("events", [])
+        if events:
+            # בחר אקראי אחד מהאירועים
+            event = events[0]
+            year = event.get("year")
+            desc = event.get("text")
+            return f"בשנת {year}: {desc}"
+        else:
+            return "לא נמצאו אירועים היסטוריים ביום זה."
+    except:
+        return "לא ניתן לשלוף אירועים היסטוריים ברגע זה."
+
+# =======================
 # קלט תאריך
 date_input = st.text_input("הכנס תאריך (DD/MM/YYYY)", "")
 
@@ -95,7 +116,7 @@ if date_input:
         st.success(f"התאריך {date_input} הוא: **{day_hebrew}**")
 
         # =======================
-        # הצגת לוח שנה גרפי מסודר
+        # הצגת לוח שנה גרפי
         st.subheader("📆 לוח השנה החודשי")
         cal = calendar.monthcalendar(user_date.year, user_date.month)
 
@@ -108,7 +129,6 @@ if date_input:
 
         for week in cal:
             table_html += "<tr>"
-            # התאמת סדר לפי א׳ עד שבת
             ordered_week = [week[6]] + week[:6]  # שבוע מתחיל עם ראשון (index 6), ואז שני-שישי
             for day in ordered_week:
                 if day == 0:
@@ -130,6 +150,12 @@ if date_input:
             st.image(img_url, width=120)
         else:
             st.write("לא הצלחנו לקבוע את המזל.")
+
+        # =======================
+        # הצגת אירוע היסטורי
+        st.subheader("📜 אירוע היסטורי ביום הזה")
+        event_text = historical_event(user_date.day, user_date.month)
+        st.write(event_text)
 
     except ValueError:
         st.error("פורמט התאריך לא נכון! השתמש ב-DD/MM/YYYY")
