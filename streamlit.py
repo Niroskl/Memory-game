@@ -4,9 +4,29 @@ import time
 
 st.set_page_config(page_title="Memory Game", layout="wide")
 
+# --- OPTIONAL MUSIC ---
+# כדי להפעיל מוזיקה ברקע, העלה קובץ mp3 לאפליקציה והפעל את השורה הבאה:
+# st.audio("music.mp3", autoplay=True)
+
+# --- CSS for Bigger Cards ---
+st.markdown("""
+    <style>
+        .big-card button {
+            font-size: 40px !important;
+            padding: 30px !important;
+            height: 120px !important;
+            width: 120px !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# --- SHAPES ---
+SHAPES = ["🔵", "🔺", "⭐", "❤️", "⚫", "⬛", "🌙", "🟧",
+          "🟢", "🔶", "🟣", "❄️", "🍀", "🔥", "💎", "⚡"]
+
 # --- INITIALIZATION ---
 if "cards" not in st.session_state:
-    values = list(range(1, 17)) * 2  # 32 cards (16 pairs)
+    values = SHAPES * 2  # 16 pairs → 32 cards
     random.shuffle(values)
 
     st.session_state.cards = values
@@ -25,31 +45,26 @@ def pick_card(index):
     if st.session_state.revealed[index] or st.session_state.temp_reveal[index]:
         return
 
-    # Flip the card
     st.session_state.temp_reveal[index] = True
 
-    # If first pick
     if st.session_state.first_pick is None:
         st.session_state.first_pick = index
         return
 
-    # Second pick
     first = st.session_state.first_pick
     second = index
 
     if st.session_state.cards[first] == st.session_state.cards[second]:
-        # Match
+        # match
         st.session_state.revealed[first] = True
         st.session_state.revealed[second] = True
         st.session_state.matches += 1
         st.session_state.temp_reveal[first] = False
         st.session_state.temp_reveal[second] = False
     else:
-        # Not a match → briefly show, then hide on next rerun
+        # mismatch → show briefly
         st.session_state.block = True
-
-        # Schedule hiding
-        st.session_state.hide_time = time.time() + 0.8
+        st.session_state.hide_time = time.time() + 0.9
 
     st.session_state.first_pick = None
 
@@ -63,11 +78,11 @@ def process_hiding():
 # --- GAME LOGIC ---
 process_hiding()
 
-st.title("🃏 Memory Game – 32 Cards")
+st.title("🎨 Memory Game — Shapes Edition")
 
 elapsed = int(time.time() - st.session_state.start_time)
-st.write(f"⏱️ Time: **{elapsed} seconds**")
-st.write(f"🎯 Matches: **{st.session_state.matches} / 16**")
+st.write(f"⏱️ זמן: **{elapsed} שניות**")
+st.write(f"🎯 זוגות שמצאת: **{st.session_state.matches} / 16**")
 
 cols = st.columns(8)
 
@@ -76,11 +91,12 @@ for i in range(32):
 
     with col:
         if st.session_state.revealed[i] or st.session_state.temp_reveal[i]:
-            st.button(f"{st.session_state.cards[i]}", key=f"card{i}", disabled=True)
+            st.button(st.session_state.cards[i], key=f"card{i}", disabled=True, help="", kwargs=None, type="secondary")
         else:
-            if st.button("❓", key=f"card{i}", on_click=pick_card, args=(i,)):
-                pass
+            st.markdown('<div class="big-card">', unsafe_allow_html=True)
+            st.button("❓", key=f"card{i}", on_click=pick_card, args=(i,))
+            st.markdown('</div>', unsafe_allow_html=True)
 
-# Win message
+# win message
 if st.session_state.matches == 16:
-    st.success("🎉 כל הכבוד! מצאת את כל הזוגות!")
+    st.success("🎉 ניצחת! מצאת את כל הזוגות!")
