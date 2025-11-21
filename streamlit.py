@@ -1,7 +1,6 @@
 import streamlit as st
 from datetime import datetime
 import calendar
-import requests
 
 # =======================
 # עיצוב עמוד: רקע טורקיז וטקסט לבן
@@ -31,6 +30,7 @@ st.markdown(
         max-width: 500px;
         border-collapse: collapse;
         margin-top: 20px;
+        margin-bottom: 20px;
     }
     .calendar th, .calendar td {
         border: 1px solid white;
@@ -45,7 +45,7 @@ st.markdown(
         font-size: 18px;
     }
     .today {
-        background-color: #FFD700 !important;  /* צהוב לזהות היום */
+        background-color: #FFD700 !important;  /* צהוב להיום */
         color: black;
         font-weight: bold;
     }
@@ -55,7 +55,7 @@ st.markdown(
 )
 
 st.set_page_config(page_title="📅 יום ומזל + אירוע היסטורי", layout="centered")
-st.title("📅 איזה יום זה + מזל אסטרולוגי + אירוע היסטורי")
+st.title("📅 יום ומזל אסטרולוגי + אירוע היסטורי")
 
 # =======================
 # פונקציה למזל אסטרולוגי
@@ -83,24 +83,22 @@ def zodiac_sign(day, month):
     return None, None
 
 # =======================
-# פונקציה לאירוע היסטורי
-def historical_event(day, month):
-    # שימוש ב-Wikipedia API חינמי
-    url = f"https://en.wikipedia.org/api/rest_v1/feed/onthisday/events/{month}/{day}"
-    try:
-        response = requests.get(url)
-        data = response.json()
-        events = data.get("events", [])
-        if events:
-            # בחר אקראי אחד מהאירועים
-            event = events[0]
-            year = event.get("year")
-            desc = event.get("text")
-            return f"בשנת {year}: {desc}"
-        else:
-            return "לא נמצאו אירועים היסטוריים ביום זה."
-    except:
-        return "לא ניתן לשלוף אירועים היסטוריים ברגע זה."
+# מילון אירועים היסטוריים לדוגמה
+historical_events = {
+    (21, 11): ["בשנת 1783: המצאת בלון ההליום על ידי האחים מונטגולפי.", 
+               "בשנת 1969: נחתו אסטרונאוטים על הירח במשימת אפולו 12."],
+    (1, 1): ["בשנת 1801: נבחרה לראשונה נשיאות של ארצות הברית - תור ג'פרסון.", 
+             "בשנת 2000: כניסת המילניום החדש."],
+    (25, 12): ["לידת ישו לפי המסורת הנוצרית.", 
+               "בשנת 800: קרל הגדול מוכתר כקיסר."]
+}
+
+def historical_event_local(day, month):
+    events = historical_events.get((day, month), [])
+    if events:
+        return "\n".join(events)
+    else:
+        return "לא נמצאו אירועים היסטוריים ביום זה."
 
 # =======================
 # קלט תאריך
@@ -116,11 +114,11 @@ if date_input:
         st.success(f"התאריך {date_input} הוא: **{day_hebrew}**")
 
         # =======================
-        # הצגת לוח שנה גרפי
+        # לוח שנה גרפי
         st.subheader("📆 לוח השנה החודשי")
         cal = calendar.monthcalendar(user_date.year, user_date.month)
 
-        # HTML table עם סדר ימי השבוע: א׳ ב׳ ג׳ ד׳ ה׳ ו׳ שבת
+        # סדר ימי השבוע: א׳ ב׳ ג׳ ד׳ ה׳ ו׳ שבת
         table_html = "<table class='calendar'><tr>"
         weekdays_hebrew = ["א'", "ב'", "ג'", "ד'", "ה'", "ו'", "שבת"]
         for day_name in weekdays_hebrew:
@@ -129,7 +127,8 @@ if date_input:
 
         for week in cal:
             table_html += "<tr>"
-            ordered_week = [week[6]] + week[:6]  # שבוע מתחיל עם ראשון (index 6), ואז שני-שישי
+            # התאמת סדר לפי א׳ עד שבת
+            ordered_week = [week[6]] + week[:6]  # ראשון, שני-שישי
             for day in ordered_week:
                 if day == 0:
                     table_html += "<td></td>"
@@ -143,7 +142,7 @@ if date_input:
         st.markdown(table_html, unsafe_allow_html=True)
 
         # =======================
-        # הצגת מזל אסטרולוגי
+        # מזל אסטרולוגי
         sign, img_url = zodiac_sign(user_date.day, user_date.month)
         if sign:
             st.subheader(f"♈️ המזל האסטרולוגי שלך הוא: {sign}")
@@ -152,9 +151,9 @@ if date_input:
             st.write("לא הצלחנו לקבוע את המזל.")
 
         # =======================
-        # הצגת אירוע היסטורי
+        # אירוע היסטורי
         st.subheader("📜 אירוע היסטורי ביום הזה")
-        event_text = historical_event(user_date.day, user_date.month)
+        event_text = historical_event_local(user_date.day, user_date.month)
         st.write(event_text)
 
     except ValueError:
