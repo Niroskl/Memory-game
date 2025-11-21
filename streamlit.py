@@ -13,110 +13,91 @@ if "cards" not in st.session_state:
     values = SHAPES * 2
     random.shuffle(values)
     st.session_state.cards = values
-    st.session_state.revealed = [False] * 32
-    st.session_state.temp_reveal = [False] * 32
+    st.session_state.revealed = [False]*32
     st.session_state.first_pick = None
     st.session_state.block = False
     st.session_state.hide_time = None
     st.session_state.current_player = 1
-    st.session_state.score = {1: 0, 2: 0}
+    st.session_state.score = {1:0,2:0}
+    # סיבוב אקראי לכל קלף (-15° עד 15°)
+    st.session_state.rotation = [random.randint(-15, 15) for _ in range(32)]
 
 def pick_card(i):
-    if st.session_state.block:
+    if st.session_state.block or st.session_state.revealed[i]:
         return
-    if st.session_state.revealed[i] or st.session_state.temp_reveal[i]:
-        return
-
-    st.session_state.temp_reveal[i] = True
 
     if st.session_state.first_pick is None:
         st.session_state.first_pick = i
         return
-
-    first = st.session_state.first_pick
-    second = i
-
-    if st.session_state.cards[first] == st.session_state.cards[second]:
-        st.session_state.revealed[first] = True
-        st.session_state.revealed[second] = True
-        st.session_state.score[st.session_state.current_player] += 1
-        st.session_state.temp_reveal[first] = False
-        st.session_state.temp_reveal[second] = False
-
-        # קונפטי
-        st.balloons()
-
-        # צליל התאמה
-        st.markdown("""
-            <audio autoplay>
-                <source src="match.mp3" type="audio/mp3">
-            </audio>
-        """, unsafe_allow_html=True)
-
     else:
-        st.session_state.block = True
-        st.session_state.hide_time = time.time() + 1
-        st.session_state.current_player = 2 if st.session_state.current_player == 1 else 1
-
-    st.session_state.first_pick = None
+        first = st.session_state.first_pick
+        second = i
+        if st.session_state.cards[first] == st.session_state.cards[second]:
+            st.session_state.revealed[first] = True
+            st.session_state.revealed[second] = True
+            st.session_state.score[st.current_player] += 1
+            st.balloons()
+            st.markdown("""
+                <audio autoplay>
+                    <source src="match.mp3" type="audio/mp3">
+                </audio>
+            """, unsafe_allow_html=True)
+        else:
+            st.session_state.block = True
+            st.session_state.hide_time = time.time() + 1
+            st.session_state.current_player = 2 if st.session_state.current_player == 1 else 1
+        st.session_state.first_pick = None
 
 def process_hiding():
     if st.session_state.block and time.time() > st.session_state.hide_time:
-        st.session_state.temp_reveal = [False] * 32
         st.session_state.block = False
 
 process_hiding()
 
-# CSS + עיצוב
+# CSS
 st.markdown("""
 <style>
-.game-container {
-    background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
-    padding: 20px;
-    border-radius: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+body {background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);}
+.card-button button {
+    font-size:80px !important;
+    width:280px !important;
+    height:280px !important;
+    margin:8px !important;
+    border-radius:20px !important;
+    background-color:white !important;
+    box-shadow:0 0 15px rgba(0,0,0,0.4);
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
-.card {
-    font-size: 60px !important;
-    width: 140px !important;
-    height: 140px !important;
-    margin: 8px;
-    border-radius: 20px !important;
-    background-color: white !important;
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.player-score {
-    font-size: 20px;
-    font-weight: bold;
-}
+.player-score {font-size:20px; font-weight:bold;}
 </style>
 """, unsafe_allow_html=True)
 
-# שחקנים בעברית
-st.title("🎨 משחק הזיכרון — גרסת בינוני")
-colA, colB = st.columns(2)
-with colA:
+# שחקנים
+st.title("🎨 משחק הזיכרון — קלפים גדולים ומסובבים")
+col1,col2 = st.columns(2)
+with col1:
     st.subheader("👤 שחקן 1")
     st.markdown(f"<div class='player-score'>ניקוד: {st.session_state.score[1]}</div>", unsafe_allow_html=True)
-with colB:
+with col2:
     st.subheader("👤 שחקן 2")
     st.markdown(f"<div class='player-score'>ניקוד: {st.session_state.score[2]}</div>", unsafe_allow_html=True)
 
 st.write(f"🎯 התור של: **שחקן {st.session_state.current_player}**")
 
-# המשחק עצמו
-st.markdown('<div class="game-container">', unsafe_allow_html=True)
+# המשחק
+st.markdown('<div style="display:flex; flex-wrap:wrap; justify-content:center;">', unsafe_allow_html=True)
 for i in range(32):
-    card_content = st.session_state.cards[i] if (st.session_state.revealed[i] or st.session_state.temp_reveal[i]) else "❓"
-    st.markdown(f'<div class="card">{card_content}</div>', unsafe_allow_html=True)
-    if not st.session_state.revealed[i] and not st.session_state.temp_reveal[i]:
-        if st.button("", key=f"btn{i}", on_click=pick_card, args=(i,), help="לחץ כדי לחשוף"):
-            pass
+    label = st.session_state.cards[i] if st.session_state.revealed[i] or st.session_state.first_pick==i else "❓"
+    rotation = st.session_state.rotation[i]
+    st.markdown(f'''
+        <div class="card-button" style="transform: rotate({rotation}deg);">
+            <button onclick="return false">{label}</button>
+        </div>
+    ''', unsafe_allow_html=True)
+    if not st.session_state.revealed[i] and not st.session_state.first_pick==i:
+        st.button("", key=f"btn{i}", on_click=pick_card, args=(i,), help="לחץ לחשוף")
 st.markdown('</div>', unsafe_allow_html=True)
 
 # סיום משחק
