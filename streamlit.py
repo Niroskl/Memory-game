@@ -1,27 +1,13 @@
-from vpython import *
+# התקנת הספרייה
+!pip install pywhatkit
 
-# יצירת סצנה
-scene = canvas(title="🏎️ משחק מכוניות 3D", width=800, height=600, center=vector(0,0,0))
+import pywhatkit as kit
 
-# מסלול
-track = box(pos=vector(0,0,0), size=vector(40,0.5,10), color=color.gray(0.5))
+# שליחת הודעה
+phone_number = "+972501234567"  # מספר יעד כולל קידומת מדינה
+message = "שלום! זו הודעה שנשלחה דרך Python 😊"
+hour = 12   # שעה
+minute = 30 # דקות
 
-# מכונית
-car = box(pos=vector(-18,0.5,0), size=vector(2,1,1), color=color.red)
-
-# פונקציה לשליטה במכונית
-def move_car(evt):
-    if evt.key == "up":
-        car.pos.x += 0.5
-    elif evt.key == "down":
-        car.pos.x -= 0.5
-    elif evt.key == "left":
-        car.pos.z -= 0.5
-    elif evt.key == "right":
-        car.pos.z += 0.5
-
-scene.bind("keydown", move_car)
-
-# לולאה פשוטה לשמירה על סצנה פעילה
-while True:
-    rate(60)
+# שליחה ל‑WhatsApp Web (יפתח את הדפדפן אוטומטית)
+kit.sendwhatmsg(phone_number, message, hour, minute)
