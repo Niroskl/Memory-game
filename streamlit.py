@@ -1,15 +1,28 @@
-<html>
-  <head>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  </head>
-  <body>
-    <a-scene>
-      <a-box position="0 1 -3" rotation="0 45 0" color="#4CC3D9" 
-             animation="property: rotation; to: 0 405 0; loop: true; dur: 5000"></a-box>
-      <a-sphere position="2 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
-      <a-cylinder position="-1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
-      <a-plane rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
-      <a-sky color="#ECECEC"></a-sky>
-    </a-scene>
-  </body>
-</html>
+import streamlit as st
+import random
+import pyttsx3
+
+st.set_page_config(page_title="מה יש לאכול?", layout="wide")
+st.title("🤖 המחשב אומר מה יש לאכול! 🍽️")
+st.write("לחץ על הכפתור והמחשב יגיד בקול מה יש לאכול היום!")
+
+# רשימת מאכלים
+foods = ["תפוח 🍎", "בננה 🍌", "המבורגר 🍔", "פיצה 🍕", "סושי 🍣", 
+         "עוגיה 🍪", "סלט 🥗", "נקניקיה 🌭", "לחם 🥖", "דונאט 🍩"]
+
+# אתחול היסטוריה
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+# Text-to-Speech engine
+engine = pyttsx3.init()
+engine.setProperty('rate', 150)  # מהירות הדיבור
+
+# כפתור שהמחשב מדבר
+if st.button("🤖 מה יש לאכול היום?"):
+    choice = random.choice(foods)
+    st.session_state.history.append(choice)
+    st.success(f"המחשב אומר: {choice}!")
+    
+    # המחשב מדבר
+    engine.say(f"היום
