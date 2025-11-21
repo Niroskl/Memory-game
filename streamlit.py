@@ -1,19 +1,18 @@
 import streamlit as st
 import random
 
-st.set_page_config(page_title="🍽️ מה יש לאכול במסדה?", layout="wide")
-st.title("🍽️ מה יש לאכול במסדה? 🍽️")
-st.write("לחץ על הכפתור והמחשב יציג תמונה של אוכל של מסדה!")
+st.set_page_config(page_title="🍽️ מנה של מסעדה", layout="wide")
+st.title("🍽️ לחץ על הכפתור כדי לראות את המנה של המסעדה!")
 
-# רשימת תמונות של אוכל (קבצים מקומיים או URL)
+# רשימת תמונות של מנות מהמסעדה (אפשר להכניס קבצים מקומיים או URL)
 food_images = [
-    "masada_food1.jpg",
-    "masada_food2.jpg",
-    "masada_food3.jpg",
-    "masada_food4.jpg"
+    "restaurant_food1.jpg",  # קובץ מקומי
+    "restaurant_food2.jpg",  # קובץ מקומי
+    "https://example.com/restaurant_food3.jpg",  # URL
+    "https://example.com/restaurant_food4.jpg"   # URL
 ]
 
-# כפתור להצגת תמונה רנדומלית
-if st.button("גלה מה יש לאכול!"):
+# כפתור שמציג תמונה רנדומלית של מנה
+if st.button("הצג את המנה של המסעדה"):
     chosen_image = random.choice(food_images)
-    st.image(chosen_image, caption="האוכל של מסדה 😋", use_column_width=True)
+    st.image(chosen_image, caption="מנה מהמסעדה 😋", use_column_width=True)
