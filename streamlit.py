@@ -12,10 +12,10 @@ st.set_page_config(page_title="Memory Game", layout="wide")
 st.markdown("""
     <style>
         .big-card button {
-            font-size: 40px !important;
-            padding: 30px !important;
-            height: 120px !important;
-            width: 120px !important;
+            font-size: 80px !important;
+            padding: 60px !important;
+            height: 240px !important;
+            width: 240px !important;
         }
     </style>
 """, unsafe_allow_html=True)
