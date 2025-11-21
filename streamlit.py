@@ -4,13 +4,14 @@ import time
 
 st.set_page_config(page_title="Memory Game", layout="wide")
 
+# סמלים
 SHAPES = ["🔵", "🔺", "⭐", "❤️", "⚫", "⬛", "🌙", "🟧",
           "🟢", "🔶", "🟣", "❄️", "🍀", "🔥", "💎", "⚡"]
 
+# אתחול
 if "cards" not in st.session_state:
     values = SHAPES * 2
     random.shuffle(values)
-
     st.session_state.cards = values
     st.session_state.revealed = [False] * 32
     st.session_state.temp_reveal = [False] * 32
@@ -41,12 +42,17 @@ def pick_card(i):
         st.session_state.score[st.session_state.current_player] += 1
         st.session_state.temp_reveal[first] = False
         st.session_state.temp_reveal[second] = False
+
+        # קונפטי
         st.balloons()
+
+        # צליל התאמה
         st.markdown("""
             <audio autoplay>
                 <source src="match.mp3" type="audio/mp3">
             </audio>
         """, unsafe_allow_html=True)
+
     else:
         st.session_state.block = True
         st.session_state.hide_time = time.time() + 1
@@ -61,7 +67,7 @@ def process_hiding():
 
 process_hiding()
 
-# CSS חדש עם כרטיסים גדולים באמת
+# CSS + עיצוב
 st.markdown("""
 <style>
 .game-container {
@@ -73,23 +79,26 @@ st.markdown("""
     justify-content: center;
 }
 .card {
-    font-size: 80px !important;
-    width: 220px !important;
-    height: 220px !important;
-    margin: 10px;
-    border-radius: 25px !important;
+    font-size: 60px !important;
+    width: 140px !important;
+    height: 140px !important;
+    margin: 8px;
+    border-radius: 20px !important;
     background-color: white !important;
-    box-shadow: 0px 0px 15px rgba(0,0,0,0.4);
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .player-score {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # שחקנים בעברית
-st.title("🎨 משחק הזיכרון — גרסת היוקרה")
+st.title("🎨 משחק הזיכרון — גרסת בינוני")
 colA, colB = st.columns(2)
 with colA:
     st.subheader("👤 שחקן 1")
@@ -100,16 +109,14 @@ with colB:
 
 st.write(f"🎯 התור של: **שחקן {st.session_state.current_player}**")
 
-# המשחק עצמו עם פריסה גמישה
+# המשחק עצמו
 st.markdown('<div class="game-container">', unsafe_allow_html=True)
-
 for i in range(32):
-    card_html = f'<div class="card">{st.session_state.cards[i] if (st.session_state.revealed[i] or st.session_state.temp_reveal[i]) else "❓"}</div>'
-    st.markdown(card_html, unsafe_allow_html=True)
+    card_content = st.session_state.cards[i] if (st.session_state.revealed[i] or st.session_state.temp_reveal[i]) else "❓"
+    st.markdown(f'<div class="card">{card_content}</div>', unsafe_allow_html=True)
     if not st.session_state.revealed[i] and not st.session_state.temp_reveal[i]:
         if st.button("", key=f"btn{i}", on_click=pick_card, args=(i,), help="לחץ כדי לחשוף"):
             pass
-
 st.markdown('</div>', unsafe_allow_html=True)
 
 # סיום משחק
