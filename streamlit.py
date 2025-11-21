@@ -4,36 +4,42 @@ import time
 
 st.set_page_config(page_title="Memory Game", layout="wide")
 
-# --- COLORFUL BACKGROUND ---
+
+# ------------------ יפה: רקע מעוצב וצבעוני ------------------
 st.markdown("""
     <style>
         body {
-            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            background: linear-gradient(120deg, #ff9a9e, #fecfef, #a1c4fd, #c2e9fb);
+            background-size: 300% 300%;
+            animation: beautifulBG 12s ease infinite;
         }
-        @keyframes gradientBG {
-            0%{background-position:0% 50%}
-            50%{background-position:100% 50%}
-            100%{background-position:0% 50%}
+
+        @keyframes beautifulBG {
+            0%   {background-position: 0% 50%;}
+            50%  {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
         }
+
+        /* הכרטיסים הענקיים */
         .big-card button {
-            font-size: 40px !important;
-            padding: 30px !important;
-            height: 120px !important;
-            width: 120px !important;
-            border-radius: 15px !important;
+            font-size: 80px !important;
+            height: 220px !important;
+            width: 220px !important;
+            padding: 40px !important;
+            border-radius: 25px !important;
+            background-color: white !important;
+            box-shadow: 0px 0px 12px rgba(0,0,0,0.4);
         }
     </style>
 """, unsafe_allow_html=True)
 
 
-# --- SHAPES ---
+# ------------------ סמלים ------------------
 SHAPES = ["🔵", "🔺", "⭐", "❤️", "⚫", "⬛", "🌙", "🟧",
           "🟢", "🔶", "🟣", "❄️", "🍀", "🔥", "💎", "⚡"]
 
 
-# --- INITIALIZATION ---
+# ------------------ אתחול המשחק ------------------
 if "cards" not in st.session_state:
     values = SHAPES * 2
     random.shuffle(values)
@@ -42,48 +48,58 @@ if "cards" not in st.session_state:
     st.session_state.revealed = [False] * 32
     st.session_state.temp_reveal = [False] * 32
     st.session_state.first_pick = None
-    st.session_state.matches = 0
-    st.session_state.start_time = time.time()
     st.session_state.block = False
+    st.session_state.hide_time = None
 
-    # PLAYER SYSTEM
+    # שני שחקנים בעברית
     st.session_state.current_player = 1
     st.session_state.score = {1: 0, 2: 0}
 
 
-# --- GAME LOGIC FUNCTIONS ---
-def pick_card(index):
+# ------------------ לוגיקה ------------------
+def pick_card(i):
     if st.session_state.block:
         return
-    if st.session_state.revealed[index] or st.session_state.temp_reveal[index]:
+    if st.session_state.revealed[i] or st.session_state.temp_reveal[i]:
         return
 
-    st.session_state.temp_reveal[index] = True
+    st.session_state.temp_reveal[i] = True
 
     if st.session_state.first_pick is None:
-        st.session_state.first_pick = index
+        st.session_state.first_pick = i
         return
 
     first = st.session_state.first_pick
-    second = index
+    second = i
 
     if st.session_state.cards[first] == st.session_state.cards[second]:
+        # התאמה!
         st.session_state.revealed[first] = True
         st.session_state.revealed[second] = True
-        st.session_state.matches += 1
 
-        # Player scores a point
+        # ניקוד
         st.session_state.score[st.session_state.current_player] += 1
 
+        # אפקט קונפטי 🎉
+        st.balloons()
+
+        # צליל נעים 🎵
+        try:
+            audio_file = open("match.mp3", "rb")
+            st.audio(audio_file.read(), format="audio/mp3")
+        except:
+            pass
+
+        # לא מסתירים כי זו התאמה
         st.session_state.temp_reveal[first] = False
         st.session_state.temp_reveal[second] = False
 
     else:
-        # Wait & hide
+        # לא התאמה → מסתיר אחרי שנייה
         st.session_state.block = True
         st.session_state.hide_time = time.time() + 1
 
-        # Switch player
+        # החלפת תור בין שחקנים
         st.session_state.current_player = 2 if st.session_state.current_player == 1 else 1
 
     st.session_state.first_pick = None
@@ -97,42 +113,39 @@ def process_hiding():
 
 process_hiding()
 
-# --- DISPLAY ---
-st.title("🎨 Memory Game — Two Players Edition")
 
-elapsed = int(time.time() - st.session_state.start_time)
-st.write(f"⏱️ זמן: **{elapsed} שניות**")
+# ------------------ תצוגה ------------------
+st.title("🎨 משחק הזיכרון — גרסת היוקרה")
 
 colA, colB = st.columns(2)
 
 with colA:
-    st.subheader("👤 Player 1")
+    st.subheader("👤 שחקן 1")
     st.write(f"ניקוד: **{st.session_state.score[1]}**")
 
 with colB:
-    st.subheader("👤 Player 2")
+    st.subheader("👤 שחקן 2")
     st.write(f"ניקוד: **{st.session_state.score[2]}**")
 
-st.write(f"🎯 עכשיו משחק: **Player {st.session_state.current_player}**")
+st.write(f"🎯 התור של: **שחקן {st.session_state.current_player}**")
 
-cols = st.columns(8)
+cols = st.columns(4)  # 4 בעמודה כדי להתאים לכרטיסים הגדולים
 
 for i in range(32):
-    col = cols[i % 8]
-
-    with col:
+    with cols[i % 4]:
+        st.markdown('<div class="big-card">', unsafe_allow_html=True)
         if st.session_state.revealed[i] or st.session_state.temp_reveal[i]:
-            st.button(st.session_state.cards[i], key=f"card{i}", disabled=True)
+            st.button(st.session_state.cards[i], key=f"c{i}", disabled=True)
         else:
-            st.markdown('<div class="big-card">', unsafe_allow_html=True)
-            st.button("❓", key=f"card{i}", on_click=pick_card, args=(i,))
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.button("❓", key=f"c{i}", on_click=pick_card, args=(i,))
+        st.markdown('</div>', unsafe_allow_html=True)
 
-# Winner message
-if sum(st.session_state.revealed) == 32:
+
+# ------------------ סיום משחק ------------------
+if all(st.session_state.revealed):
     if st.session_state.score[1] > st.session_state.score[2]:
-        st.success("🏆 Player 1 ניצח!")
+        st.success("🏆 שחקן 1 ניצח!")
     elif st.session_state.score[2] > st.session_state.score[1]:
-        st.success("🏆 Player 2 ניצח!")
+        st.success("🏆 שחקן 2 ניצח!")
     else:
         st.info("🤝 תיקו!")
