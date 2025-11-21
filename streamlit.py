@@ -1,15 +1,17 @@
 import streamlit as st
 from PIL import Image
+import requests
+from io import BytesIO
 
 st.set_page_config(page_title="🤖 רובוטים חכמים בלי AI", layout="wide")
 st.title("🤖 רובוטים חכמים - Streamlit (ללא AI)")
 
-# רובוטים עם תמונה
+# רשימת רובוטים עם תמונות מהאינטרנט
 robots = {
-    "רובוט דובר": "robot_speaker.png",
-    "רובוט מנקה": "robot_cleaner.png",
-    "רובוט שמירה": "robot_guard.png",
-    "רובוט עוזר": "robot_helper.png"
+    "רובוט דובר": "https://i.imgur.com/5bXwQF5.png",
+    "רובוט מנקה": "https://i.imgur.com/q4Bv0yH.png",
+    "רובוט שמירה": "https://i.imgur.com/kN0P4Hg.png",
+    "רובוט עוזר": "https://i.imgur.com/ZTn5Y7S.png"
 }
 
 # יצירת היסטוריה אם לא קיימת
@@ -19,8 +21,10 @@ if "history" not in st.session_state:
 # בחירת רובוט
 selected_robot = st.selectbox("בחר רובוט לשלוח לו הודעה:", list(robots.keys()))
 
-# הצגת תמונת הרובוט
-robot_image = Image.open(robots[selected_robot])
+# פתיחת תמונה מהרשת
+url = robots[selected_robot]
+response = requests.get(url)
+robot_image = Image.open(BytesIO(response.content))
 st.image(robot_image, width=200)
 
 # פונקציה שמחזירה תגובה לפי מילות מפתח
@@ -42,12 +46,13 @@ with st.form(key="message_form"):
     
     if submit_button:
         if message.strip() != "":
+            # הוספת הודעת המשתמש והתגובה
             st.session_state.history.append(f"אתה -> {selected_robot}: {message}")
             st.session_state.history.append(f"{selected_robot} -> אתה: {robot_response(message)}")
         else:
             st.error("נא להקליד הודעה לפני השליחה!")
 
-# הצגת היסטוריה
+# הצגת היסטוריה של הודעות
 st.subheader("📜 היסטוריית הודעות")
 for msg in st.session_state.history:
     st.write(msg)
