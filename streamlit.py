@@ -1,7 +1,7 @@
 import streamlit as st
 import random
 
-st.set_page_config(page_title="🤖 רובוטים חכמים עם מוזיקה", layout="wide")
+st.set_page_config(page_title="🤖 רובוטים חכמים + מוזיקה מתקדמת", layout="wide")
 st.title("🤖 רובוטים חכמים + מוזיקה 🎵")
 
 # רובוטים עם תמונות מהאינטרנט
@@ -12,24 +12,29 @@ robots = {
     "רובוט עוזר": "https://via.placeholder.com/200?text=רובוט+עוזר"
 }
 
-# URL של שיר קצר מהאינטרנט שישמש למוזיקה ברקע
-music_url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+# שירים שונים לפי רובוט
+robot_songs = {
+    "רובוט דובר": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    "רובוט מנקה": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    "רובוט שמירה": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    "רובוט עוזר": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+}
 
 # יצירת היסטוריה אם לא קיימת
 if "history" not in st.session_state:
     st.session_state.history = []
 
-# יצירת מילון לשמירת תגובות שכבר נאמרו לכל רובוט
+# מילון לשמירת תגובות שכבר נאמרו לכל רובוט
 if "used_responses" not in st.session_state:
     st.session_state.used_responses = {}
 
 # בחירת רובוט
 selected_robot = st.selectbox("בחר רובוט לשלוח לו הודעה:", list(robots.keys()))
 
-# הצגת תמונת הרובוט ישירות מה-URL
+# הצגת תמונת הרובוט
 st.image(robots[selected_robot], width=200)
 
-# פונקציה שמחזירה תגובה אקראית לפי מילות מפתח, בלי חזרות
+# פונקציה שמחזירה תגובה אקראית לפי מילות מפתח
 def robot_response(msg, robot_name):
     msg = msg.lower()
     
@@ -58,7 +63,7 @@ def robot_response(msg, robot_name):
     st.session_state.used_responses[robot_name].append(chosen)
     return chosen
 
-# שימוש ב-form כדי שהשדה לא ייעלם
+# שימוש ב-form
 with st.form(key="message_form"):
     message = st.text_input("כתוב את ההודעה שלך לרובוט:")
     submit_button = st.form_submit_button(label="שלח הודעה")
@@ -67,13 +72,4 @@ with st.form(key="message_form"):
         if message.strip() != "":
             # הוספת הודעת המשתמש והתגובה של הרובוט
             st.session_state.history.append(f"אתה -> {selected_robot}: {message}")
-            st.session_state.history.append(f"{selected_robot} -> אתה: {robot_response(message, selected_robot)}")
-            # נגינת מוזיקה ברקע
-            st.audio(music_url, format="audio/mp3")
-        else:
-            st.error("נא להקליד הודעה לפני השליחה!")
-
-# הצגת היסטוריה של הודעות
-st.subheader("📜 היסטוריית הודעות")
-for msg in st.session_state.history:
-    st.write(msg)
+            response = robot_response(message, selecte_
