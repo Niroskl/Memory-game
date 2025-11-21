@@ -12,6 +12,13 @@ robots = {
     "רובוט עוזר": "robot_helper.png"
 }
 
+# יצירת היסטוריה ושדה קלט אם לא קיימים
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+if "current_message" not in st.session_state:
+    st.session_state.current_message = ""
+
 # בחירת רובוט
 selected_robot = st.selectbox("בחר רובוט לשלוח לו הודעה:", list(robots.keys()))
 
@@ -19,12 +26,8 @@ selected_robot = st.selectbox("בחר רובוט לשלוח לו הודעה:", l
 robot_image = Image.open(robots[selected_robot])
 st.image(robot_image, width=200)
 
-# יצירת היסטוריה אם לא קיימת
-if "history" not in st.session_state:
-    st.session_state.history = []
-
-# הזנת הודעה
-message = st.text_input("כתוב את ההודעה שלך לרובוט:")
+# הזנת הודעה ושמירה ב-session_state
+st.session_state.current_message = st.text_input("כתוב את ההודעה שלך לרובוט:", st.session_state.current_message)
 
 # פונקציה שמחזירה תגובה לפי מילות מפתח
 def robot_response(msg):
@@ -40,10 +43,12 @@ def robot_response(msg):
 
 # כפתור לשליחה
 if st.button("שלח הודעה"):
-    if message.strip() != "":
+    message = st.session_state.current_message.strip()
+    if message != "":
+        # שמירת הודעה בהיסטוריה
         st.session_state.history.append(f"אתה -> {selected_robot}: {message}")
         st.session_state.history.append(f"{selected_robot} -> אתה: {robot_response(message)}")
-        st.experimental_rerun()  # ריענון כדי שהשדה ינקה וישאר פעיל
+        st.session_state.current_message = ""  # מנקה את השדה אחרי שליחה
     else:
         st.error("נא להקליד הודעה לפני השליחה!")
 
