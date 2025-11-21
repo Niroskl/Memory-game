@@ -4,11 +4,9 @@ import time
 
 st.set_page_config(page_title="Memory Game", layout="wide")
 
-# ------------------ סמלים ------------------
 SHAPES = ["🔵", "🔺", "⭐", "❤️", "⚫", "⬛", "🌙", "🟧",
           "🟢", "🔶", "🟣", "❄️", "🍀", "🔥", "💎", "⚡"]
 
-# ------------------ אתחול ------------------
 if "cards" not in st.session_state:
     values = SHAPES * 2
     random.shuffle(values)
@@ -19,11 +17,9 @@ if "cards" not in st.session_state:
     st.session_state.first_pick = None
     st.session_state.block = False
     st.session_state.hide_time = None
-
     st.session_state.current_player = 1
     st.session_state.score = {1: 0, 2: 0}
 
-# ------------------ פונקציות ------------------
 def pick_card(i):
     if st.session_state.block:
         return
@@ -45,12 +41,12 @@ def pick_card(i):
         st.session_state.score[st.session_state.current_player] += 1
         st.session_state.temp_reveal[first] = False
         st.session_state.temp_reveal[second] = False
-        st.balloons()  # קונפטי
-        try:
-            audio_file = open("match.mp3", "rb")
-            st.audio(audio_file.read(), format="audio/mp3")
-        except:
-            pass
+        st.balloons()
+        st.markdown("""
+            <audio autoplay>
+                <source src="match.mp3" type="audio/mp3">
+            </audio>
+        """, unsafe_allow_html=True)
     else:
         st.session_state.block = True
         st.session_state.hide_time = time.time() + 1
@@ -65,34 +61,35 @@ def process_hiding():
 
 process_hiding()
 
-# ------------------ עיצוב CSS ------------------
+# CSS חדש עם כרטיסים גדולים באמת
 st.markdown("""
-    <style>
-        .game-container {
-            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
-            padding: 20px;
-            border-radius: 20px;
-        }
-        .big-card button {
-            font-size: 80px !important;
-            width: 220px !important;
-            height: 220px !important;
-            padding: 40px !important;
-            border-radius: 25px !important;
-            background-color: white !important;
-            box-shadow: 0px 0px 15px rgba(0,0,0,0.4);
-            margin: 5px 5px 5px 5px;
-        }
-        .player-score {
-            font-size: 24px;
-            font-weight: bold;
-        }
-    </style>
+<style>
+.game-container {
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
+    padding: 20px;
+    border-radius: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.card {
+    font-size: 80px !important;
+    width: 220px !important;
+    height: 220px !important;
+    margin: 10px;
+    border-radius: 25px !important;
+    background-color: white !important;
+    box-shadow: 0px 0px 15px rgba(0,0,0,0.4);
+}
+.player-score {
+    font-size: 24px;
+    font-weight: bold;
+}
+</style>
 """, unsafe_allow_html=True)
 
-# ------------------ תצוגה ------------------
+# שחקנים בעברית
 st.title("🎨 משחק הזיכרון — גרסת היוקרה")
-
 colA, colB = st.columns(2)
 with colA:
     st.subheader("👤 שחקן 1")
@@ -103,25 +100,19 @@ with colB:
 
 st.write(f"🎯 התור של: **שחקן {st.session_state.current_player}**")
 
-# ------------------ המשחק עצמו עם רקע ------------------
+# המשחק עצמו עם פריסה גמישה
 st.markdown('<div class="game-container">', unsafe_allow_html=True)
 
-# 4 עמודות × 8 שורות
-cols = st.columns(4)
 for i in range(32):
-    with cols[i % 4]:
-        if st.session_state.revealed[i] or st.session_state.temp_reveal[i]:
-            st.markdown('<div class="big-card">', unsafe_allow_html=True)
-            st.button(st.session_state.cards[i], key=f"c{i}", disabled=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-        else:
-            st.markdown('<div class="big-card">', unsafe_allow_html=True)
-            st.button("❓", key=f"c{i}", on_click=pick_card, args=(i,))
-            st.markdown('</div>', unsafe_allow_html=True)
+    card_html = f'<div class="card">{st.session_state.cards[i] if (st.session_state.revealed[i] or st.session_state.temp_reveal[i]) else "❓"}</div>'
+    st.markdown(card_html, unsafe_allow_html=True)
+    if not st.session_state.revealed[i] and not st.session_state.temp_reveal[i]:
+        if st.button("", key=f"btn{i}", on_click=pick_card, args=(i,), help="לחץ כדי לחשוף"):
+            pass
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ------------------ סיום משחק ------------------
+# סיום משחק
 if all(st.session_state.revealed):
     if st.session_state.score[1] > st.session_state.score[2]:
         st.success("🏆 שחקן 1 ניצח!")
