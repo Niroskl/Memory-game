@@ -1,29 +1,35 @@
 import streamlit as st
-import random
 
-st.title("🏎️ משחק מכוניות – מירוץ מהיר!")
+st.title("🏎️ סימולציה: נסיעה עם מכונית")
 
-# רשימת מכוניות וצבעים
-cars = ["פורשה", "פרארי", "למבורגיני", "מרצדס AMG", "ב.מ.וו M", "טסלה"]
-colors = ["אדום", "כחול", "שחור", "לבן", "צהוב", "כסף", "ירוק"]
+# הגדרת מיקום ההתחלתי
+if "x" not in st.session_state:
+    st.session_state.x = 0
+    st.session_state.y = 0
 
-# בחירת מכונית וצבע
-car = st.selectbox("בחר מכונית:", cars)
-color = st.selectbox("בחר צבע:", colors)
+# פקודות לנהיגה
+col1, col2, col3 = st.columns(3)
 
-st.write(f"🚗 בחרת מכונית: {car} בצבע {color}")
+with col1:
+    if st.button("⬅️ שמאלה"):
+        st.session_state.x -= 1
+with col2:
+    if st.button("⬆️ קדימה"):
+        st.session_state.y += 1
+with col3:
+    if st.button("➡️ ימינה"):
+        st.session_state.x += 1
 
-# כפתור להתחלת מירוץ
-if st.button("התחל מירוץ!"):
-    # רנדום מהירות וניצחון
-    player_speed = random.randint(100, 300)  # מהירות של המשתמש
-    opponent_speed = random.randint(100, 300)  # מהירות יריב
-    st.write(f"מהירות שלך: {player_speed} קמ\"ש")
-    st.write(f"מהירות היריב: {opponent_speed} קמ\"ש")
+# הצגת המיקום הנוכחי
+st.write(f"🚗 מיקום המכונית: X = {st.session_state.x}, Y = {st.session_state.y}")
 
-    if player_speed > opponent_speed:
-        st.success("🎉 ניצחת במירוץ!")
-    elif player_speed < opponent_speed:
-        st.error("😢 הפסדת במירוץ!")
-    else:
-        st.info("🤝 תוצאה שווה! משחק מחדש.")
+# אפשר להוסיף מסלול גרפי עם emojis או תמונות:
+track = [["⬜"]*10 for _ in range(10)]
+# סימון המכונית במיקום הנוכחי
+x = max(0, min(st.session_state.x, 9))
+y = max(0, min(st.session_state.y, 9))
+track[y][x] = "🚗"
+
+# הצגת המסלול
+for row in track[::-1]:  # הופכים את המסלול כדי Y=0 למטה
+    st.write(" ".join(row))
