@@ -1,17 +1,14 @@
 import streamlit as st
-from PIL import Image
-import requests
-from io import BytesIO
 
 st.set_page_config(page_title="🤖 רובוטים חכמים בלי AI", layout="wide")
 st.title("🤖 רובוטים חכמים - Streamlit (ללא AI)")
 
-# רשימת רובוטים עם תמונות מהאינטרנט
+# רובוטים עם תמונות ישירות מהאינטרנט
 robots = {
-    "רובוט דובר": "https://i.imgur.com/5bXwQF5.png",
-    "רובוט מנקה": "https://i.imgur.com/q4Bv0yH.png",
-    "רובוט שמירה": "https://i.imgur.com/kN0P4Hg.png",
-    "רובוט עוזר": "https://i.imgur.com/ZTn5Y7S.png"
+    "רובוט דובר": "https://via.placeholder.com/200?text=רובוט+דובר",
+    "רובוט מנקה": "https://via.placeholder.com/200?text=רובוט+מנקה",
+    "רובוט שמירה": "https://via.placeholder.com/200?text=רובוט+שמירה",
+    "רובוט עוזר": "https://via.placeholder.com/200?text=רובוט+עוזר"
 }
 
 # יצירת היסטוריה אם לא קיימת
@@ -21,11 +18,8 @@ if "history" not in st.session_state:
 # בחירת רובוט
 selected_robot = st.selectbox("בחר רובוט לשלוח לו הודעה:", list(robots.keys()))
 
-# פתיחת תמונה מהרשת
-url = robots[selected_robot]
-response = requests.get(url)
-robot_image = Image.open(BytesIO(response.content))
-st.image(robot_image, width=200)
+# הצגת תמונת הרובוט ישירות מה-URL
+st.image(robots[selected_robot], width=200)
 
 # פונקציה שמחזירה תגובה לפי מילות מפתח
 def robot_response(msg):
