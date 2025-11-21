@@ -44,7 +44,7 @@ st.markdown(
         font-size: 18px;
     }
     .today {
-        background-color: #FFD700 !important;  /* צהוב מזהיר להיום */
+        background-color: #FFD700 !important;  /* צהוב לזהות היום */
         color: black;
         font-weight: bold;
     }
@@ -59,10 +59,9 @@ st.title("📅 איזה יום זה + מזל אסטרולוגי")
 # =======================
 # פונקציה למזל אסטרולוגי מדויק
 def zodiac_sign(day, month):
-    # רשימת גבולות המדויקים של המזלות
     zodiac = [
-        ("גדי", (22,12),(19,1), "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Capricorn_symbol.svg/120px-Capricorn_symbol.svg.png"),
-        ("דלי", (20,1),(18,2), "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Aquarius_symbol.svg/120px-Aquarius_symbol.svg.png"),
+        ("גדי", (22,12),(19,1), "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Capricorn_symbol.svg/120px-Capricorn_symbol.svg.png"),
+        ("דלי", (20,1),(18,2), "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Aquarius_symbol.svg/120px-Aquarius_symbol.svg.png"),
         ("דגים", (19,2),(20,3), "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Pisces_symbol.svg/120px-Pisces_symbol.svg.png"),
         ("טלה", (21,3),(19,4), "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Aries_symbol.svg/120px-Aries_symbol.svg.png"),
         ("שור", (20,4),(20,5), "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Taurus_symbol.svg/120px-Taurus_symbol.svg.png"),
@@ -96,20 +95,22 @@ if date_input:
         st.success(f"התאריך {date_input} הוא: **{day_hebrew}**")
 
         # =======================
-        # הצגת לוח שנה גרפי
+        # הצגת לוח שנה גרפי מסודר
         st.subheader("📆 לוח השנה החודשי")
         cal = calendar.monthcalendar(user_date.year, user_date.month)
 
-        # HTML table לוח שנה
+        # HTML table עם סדר ימי השבוע: א׳ ב׳ ג׳ ד׳ ה׳ ו׳ שבת
         table_html = "<table class='calendar'><tr>"
-        weekdays_hebrew = ["ב'", "ג'", "ד'", "ה'", "ו'", "שבת", "א'"]
+        weekdays_hebrew = ["א'", "ב'", "ג'", "ד'", "ה'", "ו'", "שבת"]
         for day_name in weekdays_hebrew:
             table_html += f"<th>{day_name}</th>"
         table_html += "</tr>"
 
         for week in cal:
             table_html += "<tr>"
-            for day in week:
+            # התאמת סדר לפי א׳ עד שבת
+            ordered_week = [week[6]] + week[:6]  # שבוע מתחיל עם ראשון (index 6), ואז שני-שישי
+            for day in ordered_week:
                 if day == 0:
                     table_html += "<td></td>"
                 elif day == user_date.day:
