@@ -1,52 +1,34 @@
 import streamlit as st
-from transformers import pipeline
-from PIL import Image
-import random
 
-st.set_page_config(page_title="🤖 רובוטים חכמים", layout="wide")
-st.title("🤖 רובוטים חכמים - Streamlit Game")
+st.title("🤖 רובוטים שמבינים קצת - Streamlit")
 
-# רובוטים עם תמונה מותאמת
-robots = {
-    "רובוט דובר": "robot_speaker.png",
-    "רובוט מנקה": "robot_cleaner.png",
-    "רובוט שמירה": "robot_guard.png",
-    "רובוט עוזר": "robot_helper.png"
-}
+robots = ["רובוט דובר", "רובוט מנקה", "רובוט שמירה", "רובוט עוזר"]
 
-# Text Generation AI (GPT-2 קטן)
-generator = pipeline("text-generation", model="gpt2")
-
-# בחירת רובוט
-selected_robot = st.selectbox("בחר רובוט לשלוח לו הודעה:", list(robots.keys()))
-
-# הצגת תמונת הרובוט
-robot_image = Image.open(robots[selected_robot])
-st.image(robot_image, width=200)
-
-# הזנת הודעה
+selected_robot = st.selectbox("בחר רובוט לשלוח לו הודעה:", robots)
 message = st.text_input("כתוב את ההודעה שלך לרובוט:")
 
-# פונקציה ליצירת תגובת רובוט חכמה
-def robot_response_ai(msg):
-    prompt = f"הודעה לרובוט: '{msg}'. תגובת הרובוט:"
-    response = generator(prompt, max_length=50, num_return_sequences=1)
-    return response[0]['generated_text'].split("תגובת הרובוט:")[-1].strip()
+# פונקציה שמחזירה תגובה לפי מילות מפתח
+def robot_response(msg):
+    msg = msg.lower()
+    if "גנב" in msg or "סכנה" in msg:
+        return "אני שולח את השמירה מיד!"
+    elif "טוב" in msg or "בסדר" in msg:
+        return "מצוין, אני ממשיך במעקב."
+    elif "עזרה" in msg:
+        return "אני בדרך, הישאר רגוע!"
+    else:
+        return "מעניין, ספר לי עוד!"
 
-# שליחת הודעה
 if st.button("שלח הודעה"):
     if message.strip() != "":
         if "history" not in st.session_state:
             st.session_state.history = []
-        # הוספת הודעת המשתמש
         st.session_state.history.append(f"אתה -> {selected_robot}: {message}")
-        # תגובת הרובוט
-        response = robot_response_ai(message)
-        st.session_state.history.append(f"{selected_robot} -> אתה: {response}")
+        st.session_state.history.append(f"{selected_robot} -> אתה: {robot_response(message)}")
     else:
         st.error("נא להקליד הודעה לפני השליחה!")
 
-# הצגת היסטוריית הודעות
+# הצגת היסטוריה
 if "history" in st.session_state and st.session_state.history:
     st.subheader("📜 היסטוריית הודעות")
     for msg in st.session_state.history:
