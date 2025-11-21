@@ -1,13 +1,8 @@
-# התקנת הספרייה
-!pip install pywhatkit
-
+import streamlit as st
 import pywhatkit as kit
+import datetime
 
-# שליחת הודעה
-phone_number = "+972501234567"  # מספר יעד כולל קידומת מדינה
-message = "שלום! זו הודעה שנשלחה דרך Python 😊"
-hour = 12   # שעה
-minute = 30 # דקות
+st.title("📱 WhatsApp Messenger - Streamlit App")
 
-# שליחה ל‑WhatsApp Web (יפתח את הדפדפן אוטומטית)
-kit.sendwhatmsg(phone_number, message, hour, minute)
+# הזנת מספר טלפון
+phone_number = st.text_input("הכנס מספר טלפון (כולל קידומת מדינה
