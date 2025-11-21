@@ -1,52 +1,29 @@
-import streamlit as st
-import random
-import time
+import cv2
 
-st.set_page_config(page_title="משחק מחני אוכל משודרג", layout="wide")
+# טוען את המודל לזיהוי גוף מלא
+body_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fullbody.xml')
 
-# אתחול
-if "table" not in st.session_state:
-    st.session_state.table = []
-if "score" not in st.session_state:
-    st.session_state.score = 0
+cap = cv2.VideoCapture(0)  # מצלמה
 
-st.title("🍽️ משחק מחני אוכל - גרסה משודרגת 🍽️")
-st.write("סמן כמה מוצרים ולחץ כדי להניח אותם על השולחן בבת אחת!")
+score = 0
 
-# רשימת מוצרים מורחבת
-foods = ["🍎", "🍌", "🍔", "🍕", "🍣", "🍪", "🥗", "🌭", 
-         "🥖", "🍩", "🍇", "🍉", "🥥", "🥛", "🧋", "🍫", "🍿", "🍟", "🥪", "🥓"]
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
 
-# בחירה מרובה
-selected_foods = st.multiselect("בחר את המוצרים להנחה על השולחן:", foods)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    bodies = body_cascade.detectMultiScale(gray, 1.1, 3)
 
-# כפתור להנחה
-if st.button("🍽️ מחן את כולם עכשיו!"):
-    if selected_foods:
-        st.session_state.table.extend(selected_foods)
-        st.session_state.score += len(selected_foods)
-        st.balloons()  # קונפטי
-        # צליל
-        st.markdown("""
-            <audio autoplay>
-                <source src="pour.mp3" type="audio/mp3">
-            </audio>
-        """, unsafe_allow_html=True)
-    else:
-        st.warning("❗ בחר לפחות מוצר אחד")
+    for (x, y, w, h) in bodies:
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        score += 1  # סופר כל אדם שנתפס
 
-# שולחן גרפי עם מיקום רנדומלי לכל מוצר
-st.subheader("השולחן שלך:")
-st.markdown('<div style="position:relative; width:100%; height:500px; background: linear-gradient(135deg, #ffe5d9, #ffd6a5, #fdffb6, #caffbf); border-radius:20px;">', unsafe_allow_html=True)
-for item in st.session_state.table:
-    top = random.randint(10, 400)
-    left = random.randint(10, 900)
-    rotation = random.randint(-30, 30)
-    st.markdown(f'''
-        <div style="position:absolute; top:{top}px; left:{left}px; font-size:50px; transform: rotate({rotation}deg);">
-            {item}
-        </div>
-    ''', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+    cv2.putText(frame, f"Score: {score}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.imshow('Hypnotize People Game', frame)
 
-st.write(f"🥇 נקודות: {st.session_state.score}")
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
