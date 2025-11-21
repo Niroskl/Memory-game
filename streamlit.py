@@ -1,25 +1,29 @@
-# רשימת רובים
-guns = ["רובה AK", "רובה M4", "רובה Sniper", "רובה Shotgun"]
+import streamlit as st
 
-# פונקציה לשלוח הודעה / פעולה לרובה
-def send_message(gun, message):
-    print(f"שלחנו ל-{gun}: {message}")
+st.title("🤖 שליחת הודעות לרובוטים - Streamlit Game")
 
-# משחק - המשתמש בוחר רובה ומקליד הודעה
-while True:
-    print("\nרובים זמינים:")
-    for i, gun in enumerate(guns, 1):
-        print(f"{i}. {gun}")
-    
-    choice = input("בחר מספר רובה לשלוח לו הודעה (או 'q' ליציאה): ")
-    
-    if choice.lower() == 'q':
-        print("סיימנו את המשחק!")
-        break
-    
-    if choice.isdigit() and 1 <= int(choice) <= len(guns):
-        gun = guns[int(choice) - 1]
-        message = input("כתוב את ההודעה שלך לרובה: ")
-        send_message(gun, message)
+# רשימת רובוטים
+robots = ["רובוט דובר", "רובוט מנקה", "רובוט שמירה", "רובוט עוזר"]
+
+# בחירת רובוט
+selected_robot = st.selectbox("בחר רובוט לשלוח לו הודעה:", robots)
+
+# הזנת הודעה
+message = st.text_input("כתוב את ההודעה שלך לרובוט:")
+
+# כפתור לשליחה
+if st.button("שלח הודעה"):
+    if message.strip() != "":
+        st.success(f"שלחנו ל-{selected_robot}: {message}")
+        # שמירה בהיסטוריה
+        if "history" not in st.session_state:
+            st.session_state.history = []
+        st.session_state.history.append(f"{selected_robot}: {message}")
     else:
-        print("בחירה לא חוקית. נסה שוב.")
+        st.error("נא להקליד הודעה לפני השליחה!")
+
+# הצגת היסטוריית הודעות
+if "history" in st.session_state and st.session_state.history:
+    st.subheader("📜 היסטוריית הודעות")
+    for msg in st.session_state.history:
+        st.write(msg)
