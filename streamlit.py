@@ -1,9 +1,10 @@
 import streamlit as st
+import random
 
 st.set_page_config(page_title="🤖 רובוטים חכמים בלי AI", layout="wide")
 st.title("🤖 רובוטים חכמים - Streamlit (ללא AI)")
 
-# רובוטים עם תמונות ישירות מהאינטרנט
+# רובוטים עם תמונות מהאינטרנט
 robots = {
     "רובוט דובר": "https://via.placeholder.com/200?text=רובוט+דובר",
     "רובוט מנקה": "https://via.placeholder.com/200?text=רובוט+מנקה",
@@ -21,17 +22,35 @@ selected_robot = st.selectbox("בחר רובוט לשלוח לו הודעה:", l
 # הצגת תמונת הרובוט ישירות מה-URL
 st.image(robots[selected_robot], width=200)
 
-# פונקציה שמחזירה תגובה לפי מילות מפתח
+# פונקציה שמחזירה תגובה אקראית לפי מילות מפתח
 def robot_response(msg):
     msg = msg.lower()
     if "גנב" in msg or "סכנה" in msg:
-        return "אני שולח את השמירה מיד!"
+        responses = [
+            "אני שולח את השמירה מיד!",
+            "אני מתריע למערכת הביטחון!",
+            "השמירה בדרך!"
+        ]
     elif "עזרה" in msg:
-        return "אני בדרך, הישאר רגוע!"
+        responses = [
+            "אני בדרך, הישאר רגוע!",
+            "אני מגיע לעזרתך!",
+            "אל דאגה, אני כאן!"
+        ]
     elif "טוב" in msg or "בסדר" in msg:
-        return "מצוין, אני ממשיך במעקב."
+        responses = [
+            "מצוין, אני ממשיך במעקב.",
+            "כל בסדר, ממשיך לפעול.",
+            "הכל מתנהל כרגיל."
+        ]
     else:
-        return "מעניין, ספר לי עוד!"
+        responses = [
+            "מעניין, ספר לי עוד!",
+            "סיפור מעניין, אני מקשיב.",
+            "ספר לי עוד פרטים!"
+        ]
+    
+    return random.choice(responses)
 
 # שימוש ב-form כדי שהשדה לא ייעלם
 with st.form(key="message_form"):
@@ -40,7 +59,7 @@ with st.form(key="message_form"):
     
     if submit_button:
         if message.strip() != "":
-            # הוספת הודעת המשתמש והתגובה
+            # הוספת הודעת המשתמש והתגובה אקראית של הרובוט
             st.session_state.history.append(f"אתה -> {selected_robot}: {message}")
             st.session_state.history.append(f"{selected_robot} -> אתה: {robot_response(message)}")
         else:
