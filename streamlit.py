@@ -19,6 +19,10 @@ selected_robot = st.selectbox("בחר רובוט לשלוח לו הודעה:", l
 robot_image = Image.open(robots[selected_robot])
 st.image(robot_image, width=200)
 
+# יצירת היסטוריה אם לא קיימת
+if "history" not in st.session_state:
+    st.session_state.history = []
+
 # הזנת הודעה
 message = st.text_input("כתוב את ההודעה שלך לרובוט:")
 
@@ -34,21 +38,16 @@ def robot_response(msg):
     else:
         return "מעניין, ספר לי עוד!"
 
-# כפתור לשליחת הודעה
+# כפתור לשליחה
 if st.button("שלח הודעה"):
     if message.strip() != "":
-        if "history" not in st.session_state:
-            st.session_state.history = []
-        # הוספת הודעת המשתמש
         st.session_state.history.append(f"אתה -> {selected_robot}: {message}")
-        # תגובת הרובוט לפי לוגיקה
-        response = robot_response(message)
-        st.session_state.history.append(f"{selected_robot} -> אתה: {response}")
+        st.session_state.history.append(f"{selected_robot} -> אתה: {robot_response(message)}")
+        st.experimental_rerun()  # ריענון כדי שהשדה ינקה וישאר פעיל
     else:
         st.error("נא להקליד הודעה לפני השליחה!")
 
-# הצגת היסטוריה של הודעות
-if "history" in st.session_state and st.session_state.history:
-    st.subheader("📜 היסטוריית הודעות")
-    for msg in st.session_state.history:
-        st.write(msg)
+# הצגת היסטוריה
+st.subheader("📜 היסטוריית הודעות")
+for msg in st.session_state.history:
+    st.write(msg)
